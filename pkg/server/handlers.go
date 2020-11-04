@@ -10,7 +10,7 @@ import (
 //Users of the system, will work better with a DB connection
 //but for the task purpose not a requirement asked
 //I'll try later with a DB connection
-var users []*User
+var users []*users.User
 
 //Handler type
 type Handler func(w http.ResponseWriter, r *http.Request)
