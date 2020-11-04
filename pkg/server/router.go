@@ -12,13 +12,13 @@ import (
 //must match path and method
 //map used to assert if pathExist or methodExist
 type Router struct {
-	rules map[string]map[string]http.HandlerFunc
+	defaultRules map[string]map[string]http.HandlerFunc
 }
 
 //NewRouter creates a new Router type
 func NewRouter() *Router {
 	return &Router{
-		rules: make(map[string]map[string]http.HandlerFunc),
+		defaultRules: make(map[string]map[string]http.HandlerFunc),
 	}
 }
 
@@ -59,35 +59,35 @@ func checkGetPathRegex(path string) (string, bool) {
 }
 
 //FindHandler finds the handler assigned to a route example GET /api
-func (r *Router) FindHandler(path string, method string) (http.HandlerFunc, bool, bool) {
-	_, pathExist := r.rules[path]
+func (rt *Router) FindHandler(path string, method string) (http.HandlerFunc, bool, bool) {
+	_, allowedPath := rt.defaultRules[path]
 	if method == "DELETE" || method == "PUT" {
-		path, pathExist = checkPathRegex(path)
+		path, allowedPath = checkPathRegex(path)
 	}
 	if method == "GET" {
-		path, pathExist = checkGetPathRegex(path)
+		path, allowedPath = checkGetPathRegex(path)
 	}
-	handler, methodExist := r.rules[path][method]
-	return handler, methodExist, pathExist
+	handlerFunc, allowedMethod := rt.defaultRules[path][method]
+	return handlerFunc, allowedMethod, allowedPath
 }
 
-//FindPath verifies if path is valid
-func (r *Router) FindPath(path string) bool {
-	_, pathExist := r.rules[path]
-	return pathExist
+//FindPath verifies if path is allowed
+func (rt *Router) FindPath(path string) bool {
+	_, allowedPath := rt.defaultRules[path]
+	return allowedPath
 }
 
-//ServeHTTP for HandlerFunc to check if our pathExist and methodExist
+//ServeHTTP for HandlerFunc to check if our Path and Method are allowed
 //this is executed on each request
-func (r *Router) ServeHTTP(w http.ResponseWriter, request *http.Request) {
-	handler, methodExist, pathExist := r.FindHandler(request.URL.Path, request.Method)
-	if !pathExist {
+func (rt *Router) ServeHTTP(w http.ResponseWriter, request *http.Request) {
+	handlerFunc, allowedMethod, allowedPath := rt.FindHandler(request.URL.Path, request.Method)
+	if !allowedPath {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if !methodExist {
+	if !allowedMethod {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	handler(w, request)
+	handlerFunc(w, request)
 }
