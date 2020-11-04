@@ -22,17 +22,7 @@ func NewServer(port string) *Server {
 
 //Run starts the server
 func (s *Server) Run() error {
-
 	fmt.Println("Server started on port 0.0.0.0", s.port)
-	/*
-		hf1 := func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("Hello from a HandleFunc #1 for / using Go doc ;) "))
-		}
-
-		hf2 := func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("Hello from a HandleFunc #2 for endpoint using Go doc ;) "))
-		}
-	*/
 	http.Handle("/", s.router)
 
 	err := http.ListenAndServe(s.port, nil)
