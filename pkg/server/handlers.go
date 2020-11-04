@@ -73,6 +73,26 @@ func HandleDeleteUsers(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("User not found"))
 }
 
+//HandleShowUser returns users data in JSON format
+func HandleShowUser(w http.ResponseWriter, r *http.Request) {
+	pathElements := strings.Split(r.URL.Path, "/")
+	index := len(pathElements)
+	id := pathElements[index-1]
+	for index, u := range usersdb {
+		if u.ID == id {
+			response, err := usersdb[index].ToJSON()
+			if err != nil {
+				fmt.Fprintf(w, "error: %v", err)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(response))
+			return
+		}
+	}
+	w.Write([]byte("User not found"))
+}
+
 //HandleEditUsers delete user if exist
 func HandleEditUsers(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)

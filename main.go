@@ -10,6 +10,9 @@ func main() {
 	s.Handle("/home", "GET", server.HandleHome)
 	s.Handle("/users", "GET", server.HandleUsers)
 	s.Handle("/users", "POST", server.HandleCreateUsers)
+	//You can get user by id /user/{id} method GET
+	//Example: /user/5
+	s.Handle("/user", "GET", server.HandleShowUser)
 	//You can delete users by id /users/{id} method DELETE
 	//Example: /users/5
 	s.Handle("/users", "DELETE", server.HandleDeleteUsers)
