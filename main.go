@@ -1,7 +1,7 @@
 package main
 
 import (
-	"../service-task/pkg/server"
+	"github.com/gmartinez8/server/pkg/server"
 )
 
 func main() {
@@ -10,7 +10,11 @@ func main() {
 	s.Handle("/home", "GET", server.HandleHome)
 	s.Handle("/users", "GET", server.HandleUsers)
 	s.Handle("/users", "POST", server.HandleCreateUsers)
+	//You can delete users by id /users/{id} method DELETE
+	//Example: /users/5
 	s.Handle("/users", "DELETE", server.HandleDeleteUsers)
+	//You can edit users by id /users/{id}
+	//Example: /users/5 method PUT
 	s.Handle("/users", "PUT", server.HandleEditUsers)
 	s.Run()
 }
