@@ -71,8 +71,8 @@ func (rt *Router) FindHandler(path string, method string) (http.HandlerFunc, boo
 	return handlerFunc, allowedMethod, allowedPath
 }
 
-//FindPath verifies if path is allowed
-func (rt *Router) FindPath(path string) bool {
+//AllowedPath verifies if path is allowed
+func (rt *Router) AllowedPath(path string) bool {
 	_, allowedPath := rt.defaultRules[path]
 	return allowedPath
 }
