@@ -39,11 +39,33 @@ func checkPathRegex(path string) (string, bool) {
 	return path, match
 }
 
+//checkGetPathRegex check Path for a GET request
+//and clean path if needed
+func checkGetPathRegex(path string) (string, bool) {
+	regexpPath := strings.Split(path, "/")
+	index := len(regexpPath)
+	match, err := regexp.MatchString("([0-9]+)", regexpPath[index-1])
+	if err != nil {
+		fmt.Println(err)
+	}
+	if match == true {
+		//clean the path for GET /{path}/{id}
+		//so we can return GET /{path}
+		path = strings.Replace(path, "/"+regexpPath[index-1], "", 1)
+		return path, match
+	}
+	//Returns the original path for GET /{path}
+	return path, true
+}
+
 //FindHandler finds the handler assigned to a route example GET /api
 func (r *Router) FindHandler(path string, method string) (http.HandlerFunc, bool, bool) {
 	_, pathExist := r.rules[path]
 	if method == "DELETE" || method == "PUT" {
 		path, pathExist = checkPathRegex(path)
+	}
+	if method == "GET" {
+		path, pathExist = checkGetPathRegex(path)
 	}
 	handler, methodExist := r.rules[path][method]
 	return handler, methodExist, pathExist
