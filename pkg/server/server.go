@@ -25,28 +25,28 @@ func NewServer(port string) *Server {
 //Run starts the server and asign *Router  to handle the routes
 //Router its a map[string][string]http.HandlerFunc
 //map[path][method]http.HandlerFunc
-func (s *Server) Run() error {
-	fmt.Println("Server started on port 0.0.0.0", s.port)
-	http.Handle("/", s.router)
+func (sr *Server) Run() error {
+	fmt.Println("Server started on port 0.0.0.0", sr.port)
+	http.Handle("/", sr.router)
 
-	err := http.ListenAndServe(s.port, nil)
+	err := http.ListenAndServe(sr.port, nil)
 	if err != nil {
-		log.Fatalln("Unable to run server on port", s.port)
+		log.Fatalln("Unable to run server on port", sr.port)
 		return err
 	}
 
-	log.Println("Server running on", s.port)
+	log.Println("Server running on", sr.port)
 	return nil
 }
 
 //Handle defines/register the routes i want to handle
 //also asign each route a HandlerFunc to handle it
 //you can define each HandlerFunc in handlers.go file
-func (s *Server) Handle(path string, method string, handler http.HandlerFunc) {
+func (sr *Server) Handle(path string, method string, handler http.HandlerFunc) {
 	//Check if the path already exists
-	if !s.router.FindPath(path) {
+	if !sr.router.AllowedPath(path) {
 		//If not path then create a new one
-		s.router.rules[path] = make(map[string]http.HandlerFunc)
+		sr.router.defaultRules[path] = make(map[string]http.HandlerFunc)
 	}
-	s.router.rules[path][method] = handler
+	sr.router.defaultRules[path][method] = handler
 }
