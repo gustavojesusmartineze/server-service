@@ -8,6 +8,9 @@ import (
 )
 
 //User struct
+//can be formated to JSON
+//also omitempty allows us to handle zero values on
+//FirstName, LastName and Username
 type User struct {
 	ID        string `json:"id"`
 	Email     string `json:"email"`
