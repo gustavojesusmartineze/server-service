@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/gmartinez8/server/pkg/users"
 )
 
 //Users of the system, will work better with a DB connection
 //but for the task purpose not a requirement asked
-//I'll try later with a DB connection
-var users []*users.User
+//I'll test later with a DB connection
+var usersdb []*users.User
 
 //Handler type
 type Handler func(w http.ResponseWriter, r *http.Request)
@@ -22,8 +24,8 @@ func HandleHome(w http.ResponseWriter, r *http.Request) {
 
 //HandleUsers list all users stored
 func HandleUsers(w http.ResponseWriter, r *http.Request) {
-	response, err := json.Marshal(users)
-	if len(users) == 0 {
+	response, err := json.Marshal(usersdb)
+	if len(usersdb) == 0 {
 		response, _ = json.Marshal("No users registered yet")
 	}
 	if err != nil {
@@ -37,20 +39,20 @@ func HandleUsers(w http.ResponseWriter, r *http.Request) {
 //HandleCreateUsers Handles Home Route /
 func HandleCreateUsers(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var user User
+	var user users.User
 	//decodes the json from request and stores it in the value pointed by &user
 	err := decoder.Decode(&user)
 	if err != nil {
 		fmt.Fprintf(w, "error: %v", err)
 		return
 	}
-	user.setID()
+	user.SetID()
 	response, err := user.ToJSON()
 	if err != nil {
 		fmt.Fprintf(w, "error: %v", err)
 		return
 	}
-	users = append(users, &user)
+	usersdb = append(usersdb, &user)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(response)
 }
@@ -60,9 +62,9 @@ func HandleDeleteUsers(w http.ResponseWriter, r *http.Request) {
 	pathElements := strings.Split(r.URL.Path, "/")
 	index := len(pathElements)
 	id := pathElements[index-1]
-	for index, u := range users {
+	for index, u := range usersdb {
 		if u.ID == id {
-			users = append(users[:index], users[index+1:]...)
+			usersdb = append(usersdb[:index], usersdb[index+1:]...)
 			response := "User width ID#" + u.ID + " Succesfully deleted"
 			w.Write([]byte(response))
 			return
@@ -74,7 +76,7 @@ func HandleDeleteUsers(w http.ResponseWriter, r *http.Request) {
 //HandleEditUsers delete user if exist
 func HandleEditUsers(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var user User
+	var user users.User
 	//decodes the json from request and stores it in the value pointed by &user
 	err := decoder.Decode(&user)
 	if err != nil {
@@ -85,21 +87,21 @@ func HandleEditUsers(w http.ResponseWriter, r *http.Request) {
 	index := len(pathElements)
 	id := pathElements[index-1]
 	//search for user with id received
-	for index, u := range users {
+	for index, u := range usersdb {
 		if u.ID == id {
 			if user.Email != "" {
-				users[index].Email = user.Email
+				usersdb[index].Email = user.Email
 			}
 			if user.FirstName != "" {
-				users[index].FirstName = user.FirstName
+				usersdb[index].FirstName = user.FirstName
 			}
 			if user.LastName != "" {
-				users[index].LastName = user.LastName
+				usersdb[index].LastName = user.LastName
 			}
 			if user.Username != "" {
-				users[index].Username = user.Username
+				usersdb[index].Username = user.Username
 			}
-			response, err := users[index].ToJSON()
+			response, err := usersdb[index].ToJSON()
 			if err != nil {
 				fmt.Fprintf(w, "error: %v", err)
 				return

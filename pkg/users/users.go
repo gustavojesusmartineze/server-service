@@ -32,9 +32,9 @@ func (u *User) ToJSON() ([]byte, error) {
 	return json.Marshal(u)
 }
 
-//Creates a random ID for the user
+//SetID Creates a random ID for the user
 //uuid will work better
-func (u *User) setID() {
+func (u *User) SetID() {
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	u.ID = strconv.Itoa(r1.Intn(1000))

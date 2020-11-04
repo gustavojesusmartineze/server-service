@@ -8,6 +8,9 @@ import (
 )
 
 //Router struct to handle multiples methods
+//To store a http.HandlerFunc in a key value map
+//must match path and method
+//map used to assert if pathExist or methodExist
 type Router struct {
 	rules map[string]map[string]http.HandlerFunc
 }

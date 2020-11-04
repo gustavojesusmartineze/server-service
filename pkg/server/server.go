@@ -13,6 +13,7 @@ type Server struct {
 }
 
 //NewServer creates a new Server
+//Each server will have its own Router to avoid conflicts
 func NewServer(port string) *Server {
 	return &Server{
 		port:   port,
