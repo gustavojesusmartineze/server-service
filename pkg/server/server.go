@@ -7,13 +7,14 @@ import (
 )
 
 //Server struct allows us to define multiples servers if needed
+//Each server will have its own Router to avoid conflicts
 type Server struct {
 	port   string
 	router *Router
 }
 
 //NewServer creates a new Server
-//Each server will have its own Router to avoid conflicts
+//and asign a NewRouter
 func NewServer(port string) *Server {
 	return &Server{
 		port:   port,
@@ -21,7 +22,9 @@ func NewServer(port string) *Server {
 	}
 }
 
-//Run starts the server
+//Run starts the server and asign *Router  to handle the routes
+//Router its a map[string][string]http.HandlerFunc
+//map[path][method]http.HandlerFunc
 func (s *Server) Run() error {
 	fmt.Println("Server started on port 0.0.0.0", s.port)
 	http.Handle("/", s.router)
