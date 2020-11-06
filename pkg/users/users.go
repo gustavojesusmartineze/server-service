@@ -1,3 +1,7 @@
+//Package users has the users structure
+//you can create a new user with NewUser func
+//get the user data in JSON format with ToJSON func
+//and set the an id for the user with SetID func
 package users
 
 import (
