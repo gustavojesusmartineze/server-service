@@ -1,11 +1,9 @@
 //Package users has the users structure
 //you can create a new user with NewUser func
-//get the user data in JSON format with ToJSON func
 //and set the an id for the user with SetID func
 package users
 
 import (
-	"encoding/json"
 	"math/rand"
 	"strconv"
 	"time"
@@ -32,11 +30,6 @@ func NewUser(id, Email, FirstName, LastName, Username string) *User {
 		LastName:  LastName,
 		Username:  Username,
 	}
-}
-
-//ToJSON method to avoid json.Marhsal() every where
-func (u *User) ToJSON() ([]byte, error) {
-	return json.Marshal(u)
 }
 
 //SetID Creates a random ID for the user

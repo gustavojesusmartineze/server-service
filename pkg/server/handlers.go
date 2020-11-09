@@ -47,7 +47,7 @@ func HandleCreateUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user.SetID()
-	response, err := user.ToJSON()
+	response, err := json.Marshal(user)
 	if err != nil {
 		fmt.Fprintf(w, "error: %v", err)
 		return
@@ -80,7 +80,7 @@ func HandleShowUser(w http.ResponseWriter, r *http.Request) {
 	id := pathElements[index-1]
 	for index, u := range usersdb {
 		if u.ID == id {
-			response, err := usersdb[index].ToJSON()
+			response, err := json.Marshal(usersdb[index])
 			if err != nil {
 				fmt.Fprintf(w, "error: %v", err)
 				return
@@ -121,7 +121,7 @@ func HandleEditUsers(w http.ResponseWriter, r *http.Request) {
 			if user.Username != "" {
 				usersdb[index].Username = user.Username
 			}
-			response, err := usersdb[index].ToJSON()
+			response, err := json.Marshal(usersdb[index])
 			if err != nil {
 				fmt.Fprintf(w, "error: %v", err)
 				return
