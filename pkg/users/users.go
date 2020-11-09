@@ -4,9 +4,8 @@
 package users
 
 import (
-	"math/rand"
-	"strconv"
-	"time"
+	"crypto/rand"
+	"encoding/hex"
 )
 
 //User struct
@@ -32,10 +31,13 @@ func NewUser(id, Email, FirstName, LastName, Username string) *User {
 	}
 }
 
-//SetID Creates a random ID for the user
+//SetID Creates a random ID for the user using crypto/rand library
 //uuid will work better
 func (u *User) SetID() {
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	u.ID = strconv.Itoa(r1.Intn(1000))
+	buf := make([]byte, 16)
+	_, err := rand.Read(buf)
+	if err != nil {
+		panic(err) // out of randomness, should never happen
+	}
+	u.ID = hex.EncodeToString(buf)
 }
