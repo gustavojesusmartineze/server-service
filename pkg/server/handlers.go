@@ -14,9 +14,6 @@ import (
 //I'll test later with a DB connection
 var usersdb []*users.User
 
-//Handler type
-type Handler func(w http.ResponseWriter, r *http.Request)
-
 //HandleHome Handles Home Route and /
 func HandleHome(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(" HandleHome Called \n"))
