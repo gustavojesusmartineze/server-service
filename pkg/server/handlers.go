@@ -23,7 +23,7 @@ func HandleHome(w http.ResponseWriter, r *http.Request) {
 func HandleUsers(w http.ResponseWriter, r *http.Request) {
 	response, err := json.Marshal(usersdb)
 	if len(usersdb) == 0 {
-		response, _ = json.Marshal("No users registered yet")
+		response, _ = json.Marshal(make([]users.User, 0))
 	}
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
