@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/gmartinez8/server/pkg/users"
 )
@@ -17,6 +18,7 @@ type ErrorResponse struct {
 //but for the task purpose not a requirement asked
 //I'll test later with a DB connection
 var usersdb = make(map[string]*users.User)
+var mutex = &sync.Mutex{}
 
 //HandleHome Handles Home Route and /
 func HandleHome(w http.ResponseWriter, r *http.Request) {
@@ -25,10 +27,12 @@ func HandleHome(w http.ResponseWriter, r *http.Request) {
 
 //HandleUsers list all users stored
 func HandleUsers(w http.ResponseWriter, r *http.Request) {
+	mutex.Lock()
 	response, err := json.Marshal(usersdb)
 	if len(usersdb) == 0 {
 		response, _ = json.Marshal(make([]users.User, 0))
 	}
+	mutex.Unlock()
 	if err != nil {
 		e, _ := json.Marshal(ErrorResponse{err.Error()})
 		w.WriteHeader(http.StatusInternalServerError)
@@ -60,7 +64,9 @@ func HandleCreateUsers(w http.ResponseWriter, r *http.Request) {
 		w.Write(e)
 		return
 	}
+	mutex.Lock()
 	usersdb[user.ID] = &user
+	mutex.Unlock()
 	w.Write(response)
 }
 
@@ -69,12 +75,14 @@ func HandleDeleteUsers(w http.ResponseWriter, r *http.Request) {
 	pathElements := strings.Split(r.URL.Path, "/")
 	index := len(pathElements)
 	id := pathElements[index-1]
+	mutex.Lock()
 	_, ok := usersdb[id]
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	delete(usersdb, id)
+	mutex.Unlock()
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -83,12 +91,14 @@ func HandleShowUser(w http.ResponseWriter, r *http.Request) {
 	pathElements := strings.Split(r.URL.Path, "/")
 	index := len(pathElements)
 	id := pathElements[index-1]
+	mutex.Lock()
 	_, ok := usersdb[id]
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	response, err := json.Marshal(usersdb[id])
+	mutex.Unlock()
 	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
 		e, _ := json.Marshal(ErrorResponse{err.Error()})
@@ -116,6 +126,7 @@ func HandleEditUsers(w http.ResponseWriter, r *http.Request) {
 	index := len(pathElements)
 	id := pathElements[index-1]
 	//search for user with id received
+	mutex.Lock()
 	_, ok := usersdb[id]
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
@@ -133,6 +144,7 @@ func HandleEditUsers(w http.ResponseWriter, r *http.Request) {
 	if user.Username != "" {
 		usersdb[id].Username = user.Username
 	}
+	mutex.Unlock()
 	response, err := json.Marshal(usersdb[id])
 	if err != nil {
 		e, _ := json.Marshal(ErrorResponse{err.Error()})
