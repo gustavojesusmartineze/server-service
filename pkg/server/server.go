@@ -3,7 +3,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -28,7 +27,7 @@ func NewServer(port string) *Server {
 //Router its a map[string][string]http.HandlerFunc
 //map[path][method]http.HandlerFunc
 func (sr *Server) Run() error {
-	fmt.Println("Server started on port 0.0.0.0", sr.port)
+	log.Printf("HTTP Server is starting to listen on 0.0.0.0%s", sr.port)
 	http.Handle("/", sr.router)
 
 	err := http.ListenAndServe(sr.port, nil)
@@ -37,7 +36,6 @@ func (sr *Server) Run() error {
 		return err
 	}
 
-	log.Println("Server running on", sr.port)
 	return nil
 }
 
