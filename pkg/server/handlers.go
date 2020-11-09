@@ -12,7 +12,7 @@ import (
 //Users of the system, will work better with a DB connection
 //but for the task purpose not a requirement asked
 //I'll test later with a DB connection
-var usersdb []*users.User
+var usersdb = make(map[string]*users.User)
 
 //HandleHome Handles Home Route and /
 func HandleHome(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +49,7 @@ func HandleCreateUsers(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "error: %v", err)
 		return
 	}
-	usersdb = append(usersdb, &user)
+	usersdb[user.ID] = &user
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(response)
 }
@@ -59,15 +59,13 @@ func HandleDeleteUsers(w http.ResponseWriter, r *http.Request) {
 	pathElements := strings.Split(r.URL.Path, "/")
 	index := len(pathElements)
 	id := pathElements[index-1]
-	for index, u := range usersdb {
-		if u.ID == id {
-			usersdb = append(usersdb[:index], usersdb[index+1:]...)
-			response := "User width ID#" + u.ID + " Succesfully deleted"
-			w.Write([]byte(response))
-			return
-		}
+	_, ok := usersdb[id]
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
-	w.Write([]byte("User not found"))
+	delete(usersdb, id)
+	w.WriteHeader(http.StatusOK)
 }
 
 //HandleShowUser returns users data in JSON format
@@ -75,19 +73,18 @@ func HandleShowUser(w http.ResponseWriter, r *http.Request) {
 	pathElements := strings.Split(r.URL.Path, "/")
 	index := len(pathElements)
 	id := pathElements[index-1]
-	for index, u := range usersdb {
-		if u.ID == id {
-			response, err := json.Marshal(usersdb[index])
-			if err != nil {
-				fmt.Fprintf(w, "error: %v", err)
-				return
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(response))
-			return
-		}
+	_, ok := usersdb[id]
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
-	w.Write([]byte("User not found"))
+	response, err := json.Marshal(usersdb[id])
+	if err != nil {
+		fmt.Fprintf(w, "error: %v", err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(response))
 }
 
 //HandleEditUsers delete user if exist
@@ -104,29 +101,28 @@ func HandleEditUsers(w http.ResponseWriter, r *http.Request) {
 	index := len(pathElements)
 	id := pathElements[index-1]
 	//search for user with id received
-	for index, u := range usersdb {
-		if u.ID == id {
-			if user.Email != "" {
-				usersdb[index].Email = user.Email
-			}
-			if user.FirstName != "" {
-				usersdb[index].FirstName = user.FirstName
-			}
-			if user.LastName != "" {
-				usersdb[index].LastName = user.LastName
-			}
-			if user.Username != "" {
-				usersdb[index].Username = user.Username
-			}
-			response, err := json.Marshal(usersdb[index])
-			if err != nil {
-				fmt.Fprintf(w, "error: %v", err)
-				return
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(response))
-			return
-		}
+	_, ok := usersdb[id]
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
-	w.Write([]byte("User not found"))
+	if user.Email != "" {
+		usersdb[id].Email = user.Email
+	}
+	if user.FirstName != "" {
+		usersdb[id].FirstName = user.FirstName
+	}
+	if user.LastName != "" {
+		usersdb[id].LastName = user.LastName
+	}
+	if user.Username != "" {
+		usersdb[id].Username = user.Username
+	}
+	response, err := json.Marshal(usersdb[id])
+	if err != nil {
+		fmt.Fprintf(w, "error: %v", err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(response))
 }
