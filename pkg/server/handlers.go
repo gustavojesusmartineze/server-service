@@ -2,12 +2,16 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/gmartinez8/server/pkg/users"
 )
+
+//ErrorResponse allows us to
+type ErrorResponse struct {
+	Message string
+}
 
 //Users of the system, will work better with a DB connection
 //but for the task purpose not a requirement asked
@@ -26,7 +30,9 @@ func HandleUsers(w http.ResponseWriter, r *http.Request) {
 		response, _ = json.Marshal(make([]users.User, 0))
 	}
 	if err != nil {
+		e, _ := json.Marshal(ErrorResponse{err.Error()})
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(e)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -39,18 +45,22 @@ func HandleCreateUsers(w http.ResponseWriter, r *http.Request) {
 	var user users.User
 	//decodes the json from request and stores it in the value pointed by &user
 	err := decoder.Decode(&user)
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
-		fmt.Fprintf(w, "error: %v", err)
+		e, _ := json.Marshal(ErrorResponse{err.Error()})
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(e)
 		return
 	}
 	user.SetID()
 	response, err := json.Marshal(user)
 	if err != nil {
-		fmt.Fprintf(w, "error: %v", err)
+		e, _ := json.Marshal(ErrorResponse{err.Error()})
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(e)
 		return
 	}
 	usersdb[user.ID] = &user
-	w.Header().Set("Content-Type", "application/json")
 	w.Write(response)
 }
 
@@ -79,11 +89,13 @@ func HandleShowUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response, err := json.Marshal(usersdb[id])
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
-		fmt.Fprintf(w, "error: %v", err)
+		e, _ := json.Marshal(ErrorResponse{err.Error()})
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(e)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(response))
 }
 
@@ -93,8 +105,11 @@ func HandleEditUsers(w http.ResponseWriter, r *http.Request) {
 	var user users.User
 	//decodes the json from request and stores it in the value pointed by &user
 	err := decoder.Decode(&user)
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
-		fmt.Fprintf(w, "error: %v", err)
+		e, _ := json.Marshal(ErrorResponse{err.Error()})
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(e)
 		return
 	}
 	pathElements := strings.Split(r.URL.Path, "/")
@@ -120,9 +135,10 @@ func HandleEditUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	response, err := json.Marshal(usersdb[id])
 	if err != nil {
-		fmt.Fprintf(w, "error: %v", err)
+		e, _ := json.Marshal(ErrorResponse{err.Error()})
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(e)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(response))
 }
